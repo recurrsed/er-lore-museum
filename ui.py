@@ -6,16 +6,40 @@ overlayWidth = 340
 overlayHeight = 85
 avatarWidth = 60
 avatarHeight = 60
+mainLabelTxt = None
+isAppVisible = False
 
-def setupUI(onWindowClose):
-    global app
+def setPromptText(location: str):
+    global mainLabelTxt
+
+    if mainLabelTxt == None:
+        return
+
+    mainLabelTxt.set(f"Learn about {location}.")
+    showApp()
+
+def showApp():
+    global isAppVisible
+
+    app.wm_attributes('-alpha', 0.7, '-topmost', 1)
+    isAppVisible = True
+
+def hideApp():
+    global isAppVisible
+
+    app.wm_attributes('-alpha', 0, '-topmost', 0)
+    mainLabelTxt.set("")
+    isAppVisible = False
+
+def setupUI(onWindowClose, setWatchScreenPauseState):
+    global app, mainLabelTxt
     
     if app != None:
         return app
 
     app = tkr.Tk()
     app.title('Lore Master')
-    app.wm_attributes('-alpha', 0.6, '-topmost', 1)
+    app.wm_attributes('-alpha', 0, '-topmost', 0)
     app.overrideredirect(True)
 
     # Size + position
@@ -34,15 +58,22 @@ def setupUI(onWindowClose):
     canvas.create_image(30, 30, image=background)
     canvas.place(x=10, y=5)
 
-    questionLabel = tkr.Label(app, text='Would you like to learn about ?', fg="white", bg="black", font=(25))
-    questionLabel.place(x=80, y=5)
-    infoLabel = tkr.Label(app, text='Press ] to confirm', bg="black", fg="gray", font=(20))
-    infoLabel.place(x=170, y=30)
+    mainLabelTxt = tkr.StringVar()
+    mainLabel = tkr.Label(app, textvariable=mainLabelTxt, fg="white", bg="black", font=(25))
+    mainLabel.place(x=80, y=5)
+    infoLabel = tkr.Label(app, text='Press alt-r to play audio', bg="black", fg="gray", font=("Arial", 10))
+    infoLabel.place(x=80, y=30)
 
     # This is when audio plays
     def onKeyPress(key: keyboard.Key):
-        if key == keyboard.Key.alt_gr:
-            print("Play audio")
+        if key == keyboard.Key.alt_gr and isAppVisible == True:
+            mainLabelTxt.set("Playing...")
+            # This goes after audio is done
+            setWatchScreenPauseState(False)
+            # hideApp()
+        if key == keyboard.Key.ctrl_r:
+            hideApp()
+            setWatchScreenPauseState(False)
         elif key == keyboard.Key.esc:
             onWindowClose()
             app.destroy()
