@@ -16,7 +16,7 @@ boundingBox = { 'top': 0, 'left': 0, 'width': 2560, 'height': 1440 }
 
 # Load up images
 def loadImages():
-    fileNames = next(os.walk("./images"), (None, None, []))[2]  # [] if no file
+    fileNames = next(os.walk("./images"), (None, None, []))[2]
     
     for name in fileNames:
         img = cv2.imread(f'./images/{name}')
@@ -109,4 +109,3 @@ if __name__ == "__main__":
     thread.start()
 
     setupUI(onWindowClose, setWatchScreenPauseState)
-
