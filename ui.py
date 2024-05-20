@@ -1,5 +1,6 @@
 import tkinter as tkr
 from pynput import keyboard
+from playsound import playsound, PlaysoundException
 
 app = None
 overlayWidth = 340
@@ -8,14 +9,16 @@ avatarWidth = 60
 avatarHeight = 60
 mainLabelTxt = None
 isAppVisible = False
+audioFileName = None
 
 def setPromptText(location: str):
-    global mainLabelTxt
+    global mainLabelTxt, audioFileName
 
     if mainLabelTxt == None:
         return
 
     mainLabelTxt.set(f"Learn about {location}.")
+    audioFileName = location.lower()
     showApp()
 
 def showApp():
@@ -25,11 +28,12 @@ def showApp():
     isAppVisible = True
 
 def hideApp():
-    global isAppVisible
+    global isAppVisible, audioFileName
 
     app.wm_attributes('-alpha', 0, '-topmost', 0)
     mainLabelTxt.set("")
     isAppVisible = False
+    audioFileName = None
 
 def setupUI(onWindowClose, setWatchScreenPauseState):
     global app, mainLabelTxt
@@ -68,9 +72,13 @@ def setupUI(onWindowClose, setWatchScreenPauseState):
     def onKeyPress(key: keyboard.Key):
         if key == keyboard.Key.alt_gr and isAppVisible == True:
             mainLabelTxt.set("Playing...")
-            # This goes after audio is done
+            try:
+                playsound(f"./audio/{audioFileName}-lore.mp3")
+            except PlaysoundException:
+                print("Failed to play audio.")
+
             setWatchScreenPauseState(False)
-            # hideApp()
+            hideApp()
         if key == keyboard.Key.ctrl_r:
             hideApp()
             setWatchScreenPauseState(False)
